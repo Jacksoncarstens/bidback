@@ -1,9 +1,13 @@
 // FLOW: Send SMS via Twilio → Log event to Airtable
 // TRIGGER: POST /api/send-sms from Make.com or customer UI
-// TWILIO INTEGRATION: Basic auth with TWILIO_ACCOUNT_SID:TWILIO_AUTH_TOKEN
+// AUTH: Requires valid JWT (Authorization: Bearer <token>)
+// RATE LIMIT: 10 SMS per contractor per day
 // AIRTABLE LOG: Records every SMS attempt (sent/failed) in Events table
 // RETURNS: { success: true/false, sid: "<twilio_message_id>" }
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { verifyToken } from './lib/jwt.js'
+import { checkRateLimit, DAY_MS } from './lib/rate-limit.js'
+import { applyCors } from './lib/cors.js'
 
 async function logAirtableEvent(event: Record<string, string>) {
   const { AIRTABLE_API_KEY, AIRTABLE_BASE_ID } = process.env
@@ -20,8 +24,23 @@ async function logAirtableEvent(event: Record<string, string>) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!applyCors(req, res)) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  // Auth: require valid JWT
+  const token = (req.headers['authorization'] as string | undefined)?.replace('Bearer ', '')
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+  const user = await verifyToken(token)
+  if (!user) return res.status(403).json({ error: 'Invalid or expired token' })
+
+  // Rate limit: 10 SMS per contractor per day
+  const rl = checkRateLimit(`${user.sub}:sms:${new Date().toDateString()}`, 10, DAY_MS)
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(Math.ceil((rl.resetAt - Date.now()) / 1000)))
+    return res.status(429).json({ error: 'SMS rate limit exceeded (10/day). Try again tomorrow.' })
   }
 
   const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env

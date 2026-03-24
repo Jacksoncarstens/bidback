@@ -3,8 +3,36 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-navy: #1e3a8a;
+    --color-blue: #2563eb;
+    --color-orange: #f97316;
+  }
+
   body {
     @apply text-gray-900 bg-white;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  /* Smooth dark mode transitions */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+
+  /* Override for elements that should not transition (e.g. spinning loaders) */
+  .no-transition, .animate-spin {
+    transition: none !important;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-white/20 dark:border-gray-700/50;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-sm;
   }
 }

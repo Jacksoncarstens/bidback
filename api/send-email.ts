@@ -1,9 +1,12 @@
 // FLOW: Send email via Resend → Log event to Airtable
 // TRIGGER: POST /api/send-email from Make.com or customer UI
-// RESEND INTEGRATION: Bearer auth, sends from RESEND_FROM_EMAIL (support@bidback.io)
+// AUTH: Requires valid JWT (Authorization: Bearer <token>)
+// RESEND INTEGRATION: Bearer auth, sends from RESEND_FROM_EMAIL
 // AIRTABLE LOG: Records every email send (sent/failed) in Events table
 // RETURNS: { success: true/false, id: "<resend_email_id>" }
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { verifyToken } from './lib/jwt.js'
+import { applyCors } from './lib/cors.js'
 
 async function logAirtableEvent(event: Record<string, string>) {
   const { AIRTABLE_API_KEY, AIRTABLE_BASE_ID } = process.env
@@ -20,9 +23,17 @@ async function logAirtableEvent(event: Record<string, string>) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!applyCors(req, res)) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
+  // Auth: require valid JWT
+  const token = (req.headers['authorization'] as string | undefined)?.replace('Bearer ', '')
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+  const user = await verifyToken(token)
+  if (!user) return res.status(403).json({ error: 'Invalid or expired token' })
 
   const { RESEND_API_KEY, RESEND_FROM_EMAIL } = process.env
   if (!RESEND_API_KEY) {

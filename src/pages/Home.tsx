@@ -6,15 +6,10 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import logoImg from '../assets/logo-icon.png'
-
-const TRADES = [
-  { label: 'Roofing', icon: '🏠' },
-  { label: 'HVAC', icon: '❄️' },
-  { label: 'Plumbing', icon: '🔧' },
-  { label: 'Electrical', icon: '⚡' },
-  { label: 'Landscaping', icon: '🌿' },
-  { label: 'Remodeling', icon: '🔨' },
-]
+import HeroSection from '../components/HeroSection'
+import TestimonialsSection from '../components/TestimonialsSection'
+import PricingSection from '../components/PricingSection'
+import ThemeToggle from '../components/ThemeToggle'
 
 const FAQS = [
   {
@@ -54,27 +49,6 @@ const COMPARE_ROWS = [
 ]
 
 const NAV_LINKS = ['How It Works', 'Pricing']
-
-const TESTIMONIALS = [
-  {
-    quote: "I uploaded 340 old leads on a Tuesday. By Thursday I had 6 callbacks and booked 2 jobs worth $14,000. I'd written those leads off months ago.",
-    name: 'D. Paulson',
-    title: 'Owner, Roofing Contractor',
-    location: 'Minneapolis, MN',
-  },
-  {
-    quote: "We were losing jobs because we couldn't follow up fast enough. Now every lead gets a text within seconds. Our close rate went up 30% in the first month.",
-    name: 'M. Gutierrez',
-    title: 'Office Manager, HVAC Company',
-    location: 'Dallas, TX',
-  },
-  {
-    quote: "GoHighLevel was way too complicated for us. This took 10 minutes to set up and started working immediately. Wish I'd found it sooner.",
-    name: 'T. Briggs',
-    title: 'Owner, Plumbing & Electric',
-    location: 'Columbus, OH',
-  },
-]
 
 const HOW_IT_WORKS = [
   {
@@ -125,72 +99,6 @@ const FEATURES = [
     title: 'Plugs into what you already use',
     desc: 'Works with your existing forms, CRM, or spreadsheets. No new systems to learn just connect and go.',
   },
-]
-
-const PRICING = [
-  {
-    name: 'Starter',
-    price: '$150',
-    period: '/mo',
-    desc: 'Perfect for testing the waters with your first lead list.',
-    features: [
-      'Up to 300 leads per month',
-      'SMS outreach to every lead',
-      'AI sequences — smart timing + conditional logic',
-      'Leads saved and organized automatically',
-      'Email support',
-    ],
-    cta: 'Get Started',
-    highlight: false,
-    cartSlug: 'ppa',
-    roi: 'One job covers your first month.',
-  },
-  {
-    name: 'Pro',
-    price: '$400',
-    period: '/mo',
-    desc: 'For contractors doing real volume. This is where the ROI kicks in hard.',
-    features: [
-      'Up to 1,000 leads per month',
-      'SMS + Voicemail drops',
-      'AI sequences — smart timing + conditional logic',
-      'Handles conversations and books appointments for you',
-      'Priority support',
-    ],
-    cta: 'Get Started',
-    highlight: true,
-    cartSlug: 'pro',
-    roi: 'Most customers book 10-20 jobs in month one.',
-  },
-  {
-    name: 'Enterprise',
-    price: '$800',
-    period: '/mo',
-    desc: 'Running an agency or multiple locations? Built for you.',
-    features: [
-      'Up to 3,000 leads per month',
-      'SMS + Email + Voicemail',
-      'AI sequences — smart timing + conditional logic',
-      'Auto follow-up text at +2 days if no reply',
-      'Priority support',
-      'Custom integrations',
-    ],
-    cta: 'Get Started',
-    highlight: false,
-    cartSlug: 'ent',
-    roi: 'Scale across every location you run.',
-  },
-]
-
-const STAR_PARTICLES = [
-  { top: '8%',  left: '12%',  size: 'w-1 h-1',     opacity: 'opacity-40' },
-  { top: '15%', left: '80%',  size: 'w-1.5 h-1.5', opacity: 'opacity-30' },
-  { top: '25%', left: '5%',   size: 'w-1 h-1',     opacity: 'opacity-20' },
-  { top: '5%',  left: '60%',  size: 'w-1 h-1',     opacity: 'opacity-30' },
-  { top: '40%', left: '92%',  size: 'w-1 h-1',     opacity: 'opacity-20' },
-  { top: '55%', left: '3%',   size: 'w-1.5 h-1.5', opacity: 'opacity-20' },
-  { top: '18%', left: '45%',  size: 'w-0.5 h-0.5', opacity: 'opacity-40' },
-  { top: '30%', left: '70%',  size: 'w-1 h-1',     opacity: 'opacity-25' },
 ]
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -281,17 +189,21 @@ export default function Home() {
               </a>
             ))}
           </nav>
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             <Link to="/signin" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316]">Sign In</Link>
             <a href="#pricing" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
               Get Started
             </a>
           </div>
-          <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
-            <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
-            <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
-            <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300" />
-          </button>
+          <div className="md:hidden flex items-center gap-1">
+            <ThemeToggle />
+            <button className="p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+              <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
+              <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
+              <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300" />
+            </button>
+          </div>
         </div>
         {mobileOpen && (
           <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 py-3 space-y-2">
@@ -307,67 +219,7 @@ export default function Home() {
         )}
       </header>
 
-      {/* HERO */}
-      <section className="relative bg-gradient-to-b from-[#f0f4ff] dark:from-gray-900 to-white dark:to-gray-950 py-24 px-4 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#1e3a8a] opacity-[0.06] dark:opacity-[0.15] rounded-full blur-3xl" />
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[200px] h-[200px] bg-[#f97316] opacity-[0.08] dark:opacity-[0.12] rounded-full blur-2xl" />
-          {STAR_PARTICLES.map((s, i) => (
-            <div key={i} className={`absolute ${s.size} ${s.opacity} bg-[#f97316] rounded-full`} style={{ top: s.top, left: s.left }} />
-          ))}
-        </div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-950/50 text-[#f97316] text-xs font-semibold px-3 py-1.5 rounded-full mb-8 border border-orange-200 dark:border-orange-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#f97316] animate-pulse" />
-            Built for contractors. Not agencies.
-          </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-            You've got old leads<br />
-            <span className="text-[#2563eb] dark:text-[#f97316]">sitting there making nothing.</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-4">
-            Upload your list. BidBack texts, emails, and calls them for you within seconds. Most contractors recover 10–20 jobs from leads they'd already written off.
-          </p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mb-10">No setup call. No annual contract. Cancel anytime.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#pricing" className="bg-[#1e3a8a] text-white px-8 py-3.5 rounded-lg font-semibold text-base hover:bg-blue-900 transition-colors shadow-md">
-              Start Recovering Leads
-            </a>
-            <a href="#how-it-works" className="border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-8 py-3.5 rounded-lg font-semibold text-base hover:border-[#f97316] hover:text-[#f97316] transition-colors">
-              See How It Works
-            </a>
-          </div>
-        </div>
-
-        {/* STATS BAR */}
-        <div className="max-w-4xl mx-auto mt-16 relative z-10">
-          <div className="grid grid-cols-3 gap-4 sm:gap-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg px-6 py-6">
-            {[
-              { val: '80%', label: 'of sales need 5+ follow-ups to close' },
-              { val: '44%', label: 'of contractors quit after just 1 attempt' },
-              { val: '78%', label: 'of jobs go to whoever responds first' },
-            ].map(s => (
-              <div key={s.label} className="text-center">
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#f97316]">{s.val}</div>
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* TRADES BAR */}
-        <div className="max-w-3xl mx-auto mt-10 relative z-10 text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Used by contractors in</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {TRADES.map(t => (
-              <span key={t.label} className="inline-flex items-center gap-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 text-sm px-3 py-1.5 rounded-full">
-                {t.icon} {t.label}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="py-20 px-4 bg-white dark:bg-gray-950">
@@ -388,33 +240,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Real Results</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">Contractors already winning back jobs</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={t.name} className={`bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col ${i === 1 ? 'p-8 md:-mt-4' : 'p-6'}`}>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-4 h-4 text-[#f97316]" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1">"{t.quote}"</p>
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm">{t.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{t.title} · {t.location}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection />
 
       {/* FEATURES */}
       <section id="features" className="py-20 px-4 bg-white dark:bg-gray-950">
@@ -490,57 +316,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING */}
-      <section id="pricing" className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Pricing</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">One job pays for months of BidBack</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-3">No setup fees. No long-term contracts. Cancel anytime though most people don't.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PRICING.map(p => (
-              <div key={p.name} className={`bg-white dark:bg-gray-800 rounded-2xl border p-8 flex flex-col relative ${p.highlight ? 'border-[#1e3a8a] dark:border-[#f97316] shadow-xl' : 'border-gray-200 dark:border-gray-700 shadow-sm'}`}>
-                {p.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#f97316] text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
-                    Most Popular
-                  </span>
-                )}
-                <div className="mb-6">
-                  <div className="font-bold text-gray-900 dark:text-white text-lg">{p.name}</div>
-                  <div className="mt-2 flex items-end gap-1">
-                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white">{p.price}</span>
-                    <span className="text-gray-500 dark:text-gray-400 text-sm mb-1">{p.period}</span>
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{p.desc}</p>
-                  <p className="text-xs font-semibold text-[#f97316] mt-2">💰 {p.roi}</p>
-                </div>
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {p.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                      <svg className="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to={`/cart?plan=${p.cartSlug}`}
-                  className={`w-full text-center py-3 rounded-lg font-semibold text-sm transition-colors block ${
-                    p.highlight
-                      ? 'bg-[#1e3a8a] text-white hover:bg-blue-900'
-                      : 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#f97316] hover:text-[#f97316]'
-                  }`}
-                >
-                  {p.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-6">30-day money-back guarantee. If you don't recover at least one lead, we'll refund you no questions asked.</p>
-        </div>
-      </section>
+      <PricingSection />
 
       {/* FAQ */}
       <section className="py-20 px-4 bg-white dark:bg-gray-950">

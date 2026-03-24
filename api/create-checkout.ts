@@ -1,9 +1,12 @@
 // FLOW: Customer selects plan → Stripe session created → redirect to checkout
 // TRIGGER: POST /api/create-checkout from pricing page
+// RATE LIMIT: 5 checkout attempts per email/IP per hour (prevents duplicate charges)
 // PLANS: ppa=$150/mo, pro=$400/mo, ent=$800/mo (price IDs from env)
 // STRIPE INTEGRATION: Basic auth with STRIPE_SECRET_KEY, creates recurring subscription
 // RETURNS: { url: "<stripe_checkout_session_url>" }
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { checkRateLimit, HOUR_MS } from './lib/rate-limit.js'
+import { applyCors } from './lib/cors.js'
 
 type Plan = 'ppa' | 'pro' | 'ent'
 
@@ -14,6 +17,8 @@ const PRICE_ENV_MAP: Record<Plan, string> = {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!applyCors(req, res)) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -25,6 +30,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
   const { plan, email } = body || {}
+
+  // Rate limit: 5 checkout attempts per email (or IP fallback) per hour
+  const ip = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0].trim() || 'unknown'
+  const rateLimitKey = email ? `checkout:email:${email.toLowerCase()}` : `checkout:ip:${ip}`
+  const hour = new Date().toISOString().slice(0, 13)
+  const rl = checkRateLimit(`${rateLimitKey}:${hour}`, 5, HOUR_MS)
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(Math.ceil((rl.resetAt - Date.now()) / 1000)))
+    return res.status(429).json({ error: 'Too many checkout attempts. Please wait and try again.' })
+  }
 
   if (!plan || !(plan in PRICE_ENV_MAP)) {
     return res.status(400).json({ error: 'Invalid plan. Must be one of: ppa, pro, ent' })

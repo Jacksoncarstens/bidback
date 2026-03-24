@@ -1,7 +1,7 @@
 // POST /api/voicemail/generate-for-contractor
 // Input: { email } or { contractor_id } + optional { first_name, last_name, company_name } overrides
 // Inlines ElevenLabs TTS + Vercel Blob — no dependency on other API endpoints
-// Protected by ?secret=migration-2026
+// Protected by ?secret=<MIGRATION_SECRET or ADMIN_SEED_SECRET>
 // Returns: { contractor_id, email, voicemail_url }
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { put } from '@vercel/blob'
@@ -50,15 +50,29 @@ async function findById(id: string): Promise<import('../lib/contractors.js').Con
   }
 }
 
+/** Strip characters that could break TTS or inject content into the voice script. */
+function sanitizeForTTS(input: string): string {
+  return String(input ?? '')
+    .replace(/[<>]/g, '')
+    .replace(/&/g, 'and')
+    .replace(/[^\w\s',.\-]/g, '')
+    .trim()
+    .substring(0, 50)
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const MIGRATION_SECRET = process.env.MIGRATION_SECRET || 'migration-2026'
+  const MIGRATION_SECRET = process.env.MIGRATION_SECRET
   const ADMIN_SECRET = process.env.ADMIN_SEED_SECRET
+  if (!MIGRATION_SECRET && !ADMIN_SECRET) {
+    return res.status(500).json({ error: 'No admin secrets configured — set MIGRATION_SECRET or ADMIN_SEED_SECRET' })
+  }
   const provided = req.query.secret as string
-  if (provided !== MIGRATION_SECRET && (!ADMIN_SECRET || provided !== ADMIN_SECRET)) {
-    return res.status(401).json({ error: 'Unauthorized — provide ?secret=migration-2026' })
+  const validSecret = (MIGRATION_SECRET && provided === MIGRATION_SECRET) || (ADMIN_SECRET && provided === ADMIN_SECRET)
+  if (!validSecret) {
+    return res.status(401).json({ error: 'Unauthorized — provide valid ?secret=' })
   }
 
   const { ELEVENLABS_API_KEY, ELEVENLABS_VOICE_MALE, ELEVENLABS_VOICE_FEMALE } = process.env
@@ -75,9 +89,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const contractor = contractor_id ? await findById(contractor_id) : await findByEmail(email)
   if (!contractor) return res.status(404).json({ error: 'Contractor not found' })
 
-  const firstName   = first_name   || contractor.firstName
-  const lastName    = last_name    || contractor.lastName
-  const companyName = company_name || contractor.companyName
+  // Sanitize all text fields before embedding in TTS script
+  const firstName   = sanitizeForTTS(first_name   || contractor.firstName)
+  const lastName    = sanitizeForTTS(last_name    || contractor.lastName)
+  const companyName = sanitizeForTTS(company_name || contractor.companyName)
 
   // Build TTS script
   const script  = `Hi, this is ${firstName} ${lastName} with ${companyName}. I'm following up on that project we discussed previously. If you're still interested or if anything has changed, give me a call back. Thanks!`

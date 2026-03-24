@@ -36,11 +36,12 @@ function getPortalInfo() {
 }
 
 export default function PortalUpload() {
-  const [dragging, setDragging]   = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [progress, setProgress]   = useState(0)
-  const [error, setError]         = useState<string | null>(null)
-  const [uploads, setUploads]     = useState<Upload[]>(getSavedUploads)
+  const [dragging, setDragging]     = useState(false)
+  const [uploading, setUploading]   = useState(false)
+  const [progress, setProgress]     = useState(0)
+  const [error, setError]           = useState<string | null>(null)
+  const [uploads, setUploads]       = useState<Upload[]>(getSavedUploads)
+  const [successCount, setSuccessCount] = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const info   = getPortalInfo()
@@ -133,7 +134,12 @@ export default function PortalUpload() {
       }
       saveUpload(newUpload)
       setUploads(getSavedUploads())
-      setTimeout(() => { setUploading(false); setProgress(0) }, 600)
+      setTimeout(() => {
+        setUploading(false)
+        setProgress(0)
+        setSuccessCount(data.count || 0)
+        setTimeout(() => setSuccessCount(null), 8000)
+      }, 600)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Try again.')
       setUploading(false); setProgress(0)
@@ -175,6 +181,24 @@ export default function PortalUpload() {
         </p>
         <p className="text-xs text-gray-400 mt-2">CSV format: Name, Phone, Email</p>
       </div>
+
+      {successCount !== null && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-5 py-4 flex items-start gap-4 animate-scale-in">
+          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-green-800 dark:text-green-300">
+              {successCount} leads imported successfully!
+            </p>
+            <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">
+              Outreach starts within minutes. Check your dashboard for live status.
+            </p>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-600">

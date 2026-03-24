@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, Link, useNavigate, Navigate } from 'react-router-dom'
 import logoImg from '../assets/logo-icon.png'
+import ThemeToggle from '../components/ThemeToggle'
 
 // Decode JWT payload without verifying signature (client-side check only)
 // Real verification happens server-side on each API call
@@ -192,6 +193,7 @@ export default function PortalLayout() {
             <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
             Customer Portal
           </span>
+          <ThemeToggle />
         </header>
 
         <main className="flex-1 overflow-y-auto">

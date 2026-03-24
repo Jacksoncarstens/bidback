@@ -1,10 +1,25 @@
 // POST /api/voicemail/generate
 // Input: { first_name, last_name, company_name }
+// AUTH: Requires valid JWT (Authorization: Bearer <token>)
+// RATE LIMIT: 1 generation per contractor per day (cost: ~$0.25/generation)
 // Detects gender from first_name → picks ElevenLabs voice → generates MP3 → stores in Vercel Blob
 // Logs record to Airtable "Voicemails" table
 // Returns: { voicemail_url, generated_at, status: "success" }
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { put } from '@vercel/blob'
+import { verifyToken } from '../lib/jwt.js'
+import { checkRateLimit, DAY_MS } from '../lib/rate-limit.js'
+import { applyCors } from '../lib/cors.js'
+
+/** Strip characters that could break TTS or inject content into the voice script. */
+function sanitizeForTTS(input: string): string {
+  return String(input ?? '')
+    .replace(/[<>]/g, '')          // remove angle brackets (injection prevention)
+    .replace(/&/g, 'and')          // & → "and" for natural speech
+    .replace(/[^\w\s',.\-]/g, '')  // allow only word chars, spaces, and safe punctuation
+    .trim()
+    .substring(0, 50)              // max 50 chars per field
+}
 
 const MALE_NAMES = new Set([
   'james','john','robert','michael','william','david','richard','joseph','thomas','charles',
@@ -48,7 +63,26 @@ async function logToAirtable(data: { firstName: string; lastName: string; compan
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!applyCors(req, res)) return
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+
+  // Allow bypass from the test endpoint (which applies its own IP-based rate limiting)
+  const isTestBypass = (req as Record<string, unknown>)['_voicemail_test_bypass'] === true
+
+  if (!isTestBypass) {
+    // Auth: require valid JWT
+    const token = (req.headers['authorization'] as string | undefined)?.replace('Bearer ', '')
+    if (!token) return res.status(401).json({ error: 'Unauthorized' })
+    const user = await verifyToken(token)
+    if (!user) return res.status(403).json({ error: 'Invalid or expired token' })
+
+    // Rate limit: 1 generation per contractor per day
+    const rl = checkRateLimit(`${user.sub}:voicemail_gen:${new Date().toDateString()}`, 1, DAY_MS)
+    if (!rl.allowed) {
+      res.setHeader('Retry-After', String(Math.ceil((rl.resetAt - Date.now()) / 1000)))
+      return res.status(429).json({ error: 'Voicemail generation limit reached (1/day). Try again tomorrow.' })
+    }
+  }
 
   const { ELEVENLABS_API_KEY, ELEVENLABS_VOICE_MALE, ELEVENLABS_VOICE_FEMALE } = process.env
   if (!ELEVENLABS_API_KEY) return res.status(500).json({ error: 'ELEVENLABS_API_KEY not configured' })
@@ -60,11 +94,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'first_name, last_name, and company_name are required' })
   }
 
-  const gender   = detectGender(first_name)
+  // Sanitize all user-supplied text before embedding in TTS script
+  const safeFirst   = sanitizeForTTS(first_name)
+  const safeLast    = sanitizeForTTS(last_name)
+  const safeCompany = sanitizeForTTS(company_name)
+
+  const gender   = detectGender(safeFirst)
   const voiceId  = gender === 'female'
     ? (ELEVENLABS_VOICE_FEMALE || 'FLj50PrMa40MhGHappOt')
     : (ELEVENLABS_VOICE_MALE   || 'tMvyQtpCVQ0DkixuYm6J')
-  const script   = buildScript(first_name, last_name, company_name)
+  const script   = buildScript(safeFirst, safeLast, safeCompany)
 
   // Call ElevenLabs TTS
   const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
@@ -87,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const audioBuffer = Buffer.from(await ttsRes.arrayBuffer())
-  const slug        = company_name.replace(/[^a-z0-9]/gi, '-').toLowerCase()
+  const slug        = safeCompany.replace(/[^a-z0-9]/gi, '-').toLowerCase()
   const filename    = `voicemails/${slug}-${Date.now()}.mp3`
 
   const blob = await put(filename, audioBuffer, {
@@ -96,7 +135,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   })
 
   const generatedAt = new Date().toISOString()
-  await logToAirtable({ firstName: first_name, lastName: last_name, company: company_name, voicemailUrl: blob.url, generatedAt })
+  await logToAirtable({ firstName: safeFirst, lastName: safeLast, company: safeCompany, voicemailUrl: blob.url, generatedAt })
 
   return res.status(200).json({
     voicemail_url: blob.url,

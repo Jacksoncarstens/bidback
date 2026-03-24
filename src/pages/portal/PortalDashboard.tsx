@@ -140,12 +140,12 @@ export default function PortalDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Leads Uploaded', val: total.toString(),         color: 'text-[#2563eb]' },
-          { label: 'Contacted',      val: contacted.toString(),     color: 'text-blue-500'  },
-          { label: 'Interested',     val: interested.toString(),    color: 'text-[#f97316]' },
-          { label: 'Booked',         val: booked.toString(),        color: 'text-green-500' },
+          { label: 'Leads Uploaded', val: total.toString(),         color: 'text-[#2563eb]',  accent: 'from-blue-50 dark:from-blue-950/30' },
+          { label: 'Contacted',      val: contacted.toString(),     color: 'text-blue-500',   accent: 'from-blue-50 dark:from-blue-950/30' },
+          { label: 'Interested',     val: interested.toString(),    color: 'text-[#f97316]',  accent: 'from-orange-50 dark:from-orange-950/30' },
+          { label: 'Booked',         val: booked.toString(),        color: 'text-green-500',  accent: 'from-green-50 dark:from-green-950/30' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <div key={s.label} className={`bg-gradient-to-br ${s.accent} to-white dark:to-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-4 transition-shadow hover:shadow-sm`}>
             <div className={`text-2xl font-bold ${s.color}`}>{s.val}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.label}</div>
           </div>

@@ -1,9 +1,15 @@
 // FLOW: Customer CSV → Airtable Leads table → Make.com automation
 // TRIGGER: POST /api/csv-upload from PortalUpload.tsx
-// GATE: Checks JWT tier — Free tier is blocked; paid tiers enforce lead limits
+// AUTH: JWT required — Free tier blocked; paid tiers enforce lead limits
+// RATE LIMIT: 1 upload per contractor per hour
+// FILE SIZE: 5 MB max
+// ENCRYPTION: Phone + Email encrypted at rest; PhoneHash stored for Twilio lookups
 // RETURNS: { success: true, count: <number> }
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { verifyToken } from './lib/jwt.js'
+import { checkRateLimit, HOUR_MS } from './lib/rate-limit.js'
+import { applyCors } from './lib/cors.js'
+import { encrypt, hashForLookup } from './lib/encrypt.js'
 
 const TIER_LIMITS: Record<string, number> = { Free: 0, Starter: 300, Pro: 1000, Enterprise: 3000 }
 
@@ -112,20 +118,34 @@ async function triggerMakeWebhook(data: Record<string, unknown>) {
   })
 }
 
+const MAX_FILE_BYTES = 5 * 1024 * 1024  // 5 MB
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!applyCors(req, res)) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  // Tier gate: verify JWT if present, enforce limits
-  const authHeader = req.headers['authorization'] as string | undefined
-  const token = authHeader?.replace('Bearer ', '')
-  const user = token ? await verifyToken(token) : null
+  // Auth: JWT required
+  const token = (req.headers['authorization'] as string | undefined)?.replace('Bearer ', '')
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+  const user = await verifyToken(token)
+  if (!user) return res.status(403).json({ error: 'Invalid or expired token' })
+
   const tier = user?.tier || 'Free'
   const limit = TIER_LIMITS[tier] ?? 0
 
   if (tier === 'Free') {
     return res.status(403).json({ error: 'Upgrade to a paid plan to upload leads', tier: 'Free' })
+  }
+
+  // Rate limit: 1 upload per contractor per hour
+  const hour = new Date().toISOString().slice(0, 13) // "YYYY-MM-DDTHH"
+  const rl = checkRateLimit(`${user.sub}:csv_upload:${hour}`, 1, HOUR_MS)
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(Math.ceil((rl.resetAt - Date.now()) / 1000)))
+    return res.status(429).json({ error: 'Upload rate limit exceeded (1 per hour). Try again soon.' })
   }
 
   // Step 1: Parse multipart form data to extract CSV file
@@ -141,6 +161,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     rawBody = await getRawBody(req)
   } catch {
     return res.status(400).json({ error: 'Failed to read body' })
+  }
+
+  // File size check: reject payloads over 5 MB
+  if (rawBody.length > MAX_FILE_BYTES) {
+    return res.status(413).json({ error: 'File too large. Maximum size is 5 MB.' })
   }
 
   const fileBuffer = extractMultipartFile(rawBody, boundary)
@@ -179,20 +204,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Step 3: Map flexible column names (Name, Email, Phone, etc.) to Airtable schema
   // Step 4: Create lead records with status "New", source "CSV Upload"
+  //         PII fields (Phone, Email) are encrypted at rest; PhoneHash enables Twilio reply matching.
   const createdLeads = rows.map(row => {
     const fullName = findField(row, 'name', 'fullname', 'full_name', 'full name')
     const nameParts = fullName.split(' ')
+    const rawPhone = findField(row, 'phone', 'phonenumber', 'phone_number', 'mobile')
+    const rawEmail = findField(row, 'email', 'emailaddress', 'email_address')
     return {
-      FirstName: findField(row, 'firstname', 'first_name', 'first name') || nameParts[0] || '',
-      LastName: findField(row, 'lastname', 'last_name', 'last name') || nameParts.slice(1).join(' ') || '',
-      Email: findField(row, 'email', 'emailaddress', 'email_address'),
-      Phone: findField(row, 'phone', 'phonenumber', 'phone_number', 'mobile'),
-      Service: findField(row, 'service', 'services'),
-      Notes: findField(row, 'notes', 'note', 'comments'),
-      AccountId: accountId,
-      Status: 'New',
-      Source: 'CSV Upload',
-      CreatedAt: now,
+      FirstName:  findField(row, 'firstname', 'first_name', 'first name') || nameParts[0] || '',
+      LastName:   findField(row, 'lastname', 'last_name', 'last name') || nameParts.slice(1).join(' ') || '',
+      Email:      encrypt(rawEmail),          // encrypted at rest
+      EmailHash:  hashForLookup(rawEmail),    // deterministic hash for equality lookups
+      Phone:      encrypt(rawPhone),          // encrypted at rest
+      PhoneHash:  hashForLookup(rawPhone),    // deterministic hash for Twilio reply matching
+      Service:    findField(row, 'service', 'services'),
+      Notes:      findField(row, 'notes', 'note', 'comments'),
+      AccountId:  accountId,
+      Status:     'New',
+      Source:     'CSV Upload',
+      CreatedAt:  now,
     }
   })
 
