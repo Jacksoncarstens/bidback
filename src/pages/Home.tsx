@@ -209,6 +209,9 @@ export default function Home() {
                 {l}
               </a>
             ))}
+            <Link to="/signin" className="block py-2 text-sm text-gray-700 dark:text-gray-300" onClick={() => setMobileOpen(false)}>
+              Sign In
+            </Link>
             <a href="#how-it-works" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2">
               Get Started
             </a>
