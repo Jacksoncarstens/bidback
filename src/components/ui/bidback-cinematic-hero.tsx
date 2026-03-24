@@ -172,8 +172,8 @@ export interface CinematicHeroProps extends React.HTMLAttributes<HTMLDivElement>
 
 export function CinematicHero({
   brandName = "BidBack",
-  tagline1 = "Your leads aren't dead,",
-  tagline2 = "BidBack wakes them up.",
+  tagline1 = "Your leads aren't dead.",
+  tagline2 = "",
   cardHeading = "Dead leads reborn.",
   cardDescription = (
     <>
@@ -300,9 +300,8 @@ export function CinematicHero({
       <div className="bg-grid-theme absolute inset-0 z-0 pointer-events-none opacity-50" aria-hidden="true" />
 
       <div className="hero-text-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 will-change-transform">
-        <h1 className="text-track text-silver-matte text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight" style={{ visibility: 'visible', opacity: 1, display: 'block' }}>
+        <h1 className="text-track text-3d-matte text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">
           {tagline1}
-          <div>{tagline2}</div>
         </h1>
       </div>
 
