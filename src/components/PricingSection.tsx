@@ -59,87 +59,95 @@ const PRICING = [
 
 export default function PricingSection() {
   return (
-    <section id="pricing" className="py-12 lg:py-24 bg-white dark:bg-[#1A1A1A]">
+    <section id="pricing" className="py-12 lg:py-24 bg-white dark:bg-[#030712]">
       <div className="max-w-5xl mx-auto px-4">
 
         <div className="text-center mb-14">
           <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Pricing</span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-[#E8E8E8] mt-2">
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mt-2">
             One job pays for months of BidBack
           </h2>
-          <p className="text-gray-600 dark:text-[#999999] text-lg mt-3 max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 text-lg mt-3 max-w-2xl mx-auto">
             No setup fees. No long-term contracts. Cancel anytime — though most people don't.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {PRICING.map((p, i) => (
+          {PRICING.map((p) => (
             <div
               key={p.name}
               className={`
-                relative rounded-2xl backdrop-blur-md
-                transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]
+                relative rounded-2xl p-8
+                bg-white dark:bg-[#0F0F0F]
+                border-2 border-[#6D8196]/30 dark:border-[#6D8196]
+                shadow-md dark:shadow-2xl dark:shadow-[#6D8196]/30
+                hover:shadow-lg dark:hover:shadow-[#6D8196]/40 hover:scale-105 hover:-translate-y-1
+                transition-all duration-300 flex flex-col
                 ${p.highlight
-                  ? 'md:scale-[1.04] border-2 border-[#1e3a8a] dark:border-[#f97316] bg-white/90 dark:bg-[#2A2A2A]/90 shadow-lg'
-                  : 'border border-gray-200/50 dark:border-[#333333]/50 bg-white/80 dark:bg-[#1A1A1A]/80 shadow-sm'
+                  ? 'md:scale-[1.04] border-[#6D8196] dark:border-[#6D8196] dark:ring-2 dark:ring-[#6D8196]/50 dark:shadow-[#6D8196]/50'
+                  : ''
                 }
               `}
-              style={{ animationDelay: `${i * 0.1}s` }}
             >
+
               {p.highlight && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#f97316] text-white px-4 py-1 rounded-full text-sm font-bold shadow-sm whitespace-nowrap">
-                    Most Popular
+                  <span className="inline-block bg-[#FFFFE3] text-gray-900 px-4 py-1 rounded-full text-sm font-bold shadow-sm whitespace-nowrap">
+                    ★ Most Popular
                   </span>
                 </div>
               )}
 
-              <div className="p-8">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-[#E8E8E8] mb-1">
-                  {p.name}
-                </h3>
-                <p className="text-gray-600 dark:text-[#999999] text-sm mb-6">
-                  {p.desc}
-                </p>
+              {/* Tier name + desc */}
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {p.name}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
+                {p.desc}
+              </p>
 
-                <div className="mb-2">
-                  <span className="text-4xl font-extrabold text-gray-900 dark:text-[#E8E8E8]">{p.price}</span>
-                  <span className="text-gray-600 dark:text-[#999999] ml-1">{p.period}</span>
-                </div>
-                <p className="text-xs font-semibold text-[#f97316] mb-6">💰 {p.roi}</p>
-
-                <Link
-                  to={`/cart?plan=${p.cartSlug}`}
-                  className={`
-                    block w-full text-center py-3 rounded-lg font-semibold text-sm
-                    transition-all duration-200
-                    ${p.highlight
-                      ? 'bg-[#1e3a8a] dark:bg-[#f97316] text-white hover:opacity-90 hover:shadow-md hover:scale-[1.02]'
-                      : 'border border-[#1e3a8a] dark:border-[#999999] text-[#1e3a8a] dark:text-[#999999] hover:bg-[#1e3a8a]/10 dark:hover:bg-white/5'
-                    }
-                  `}
-                >
-                  {p.cta}
-                </Link>
-
-                <div className="my-6 border-t border-gray-200 dark:border-[#333333]" />
-
-                <ul className="space-y-3">
-                  {p.features.map(f => (
-                    <li key={f} className="flex items-start gap-3">
-                      <svg className="w-5 h-5 text-[#1e3a8a] dark:text-[#f97316] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-                      </svg>
-                      <span className="text-gray-700 dark:text-[#E8E8E8] text-sm">{f}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* Price */}
+              <div className="mb-2">
+                <span className="text-5xl font-bold text-gray-900 dark:text-white">{p.price}</span>
+                <span className="text-gray-600 dark:text-gray-400 ml-2">{p.period}</span>
               </div>
+              <p className="text-xs font-semibold text-[#f97316] mb-6">💰 {p.roi}</p>
+
+              {/* CTA */}
+              <Link
+                to={`/cart?plan=${p.cartSlug}`}
+                className={`
+                  block w-full text-center py-3 rounded-lg font-semibold text-sm mb-8
+                  transition-all duration-200 hover:shadow-md hover:scale-[1.02]
+                  ${p.highlight
+                    ? 'bg-[#6D8196] text-white'
+                    : 'border-2 border-[#6D8196] text-[#6D8196] hover:bg-[#6D8196]/5 dark:hover:bg-[#6D8196]/10'
+                  }
+                `}
+              >
+                {p.cta}
+              </Link>
+
+              {/* Divider */}
+              <div className="border-t-2 border-[#6D8196]/20 dark:border-[#6D8196]/40 mb-6" />
+
+              {/* Features */}
+              <ul className="space-y-3 flex-1">
+                {p.features.map(f => (
+                  <li key={f} className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-[#6D8196] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                    </svg>
+                    <span className="text-gray-700 dark:text-gray-300 text-sm">{f}</span>
+                  </li>
+                ))}
+              </ul>
+
             </div>
           ))}
         </div>
 
-        <p className="text-center text-sm text-gray-400 dark:text-[#999999] mt-8">
+        <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-8">
           30-day money-back guarantee. If you don't recover at least one lead, we'll refund you — no questions asked.
         </p>
       </div>

@@ -31,15 +31,15 @@ const TESTIMONIALS = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-12 lg:py-24 bg-gray-50 dark:bg-[#1A1A1A]">
+    <section className="py-12 lg:py-24 bg-gray-50 dark:bg-[#030712]">
       <div className="max-w-6xl mx-auto px-4">
 
         <div className="text-center mb-14">
           <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Real Results</span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-[#E8E8E8] mt-2">
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mt-2">
             What Contractors Say
           </h2>
-          <p className="text-gray-600 dark:text-[#999999] text-lg mt-3 max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 text-lg mt-3 max-w-2xl mx-auto">
             Real results from contractors who've turned dead leads into booked jobs.
           </p>
         </div>
@@ -49,21 +49,22 @@ export default function TestimonialsSection() {
             <div
               key={t.name}
               className={`
-                rounded-2xl backdrop-blur-md p-8
-                border border-white/20 dark:border-[#333333]/50
-                bg-white/90 dark:bg-[#1A1A1A]/90
-                transition-all duration-300
-                hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1
-                ${i === 1 ? 'md:-mt-3 shadow-lg' : 'shadow-sm'}
+                relative rounded-2xl p-8
+                bg-white dark:bg-[#0F0F0F]
+                border-2 border-[#6D8196]/30 dark:border-[#6D8196]
+                shadow-md dark:shadow-2xl dark:shadow-[#6D8196]/30
+                hover:shadow-lg dark:hover:shadow-[#6D8196]/40 hover:scale-105 hover:-translate-y-2
+                transition-all duration-300 cursor-default
+                ${i === 1 ? 'md:scale-105 dark:border-[#6D8196] dark:ring-2 dark:ring-[#6D8196]/50 dark:shadow-[#6D8196]/50' : ''}
               `}
             >
+
               {/* Stars */}
-              <div className="flex gap-1 mb-5">
+              <div className="flex gap-1 mb-6">
                 {[...Array(5)].map((_, j) => (
                   <svg
                     key={j}
-                    className={`w-5 h-5 ${j < t.rating ? '' : 'opacity-20'}`}
-                    style={{ color: j < t.rating ? '#FFFFE3' : '#999' }}
+                    className={`w-5 h-5 ${j < t.rating ? 'text-[#FFFFE3]' : 'text-gray-400 dark:text-gray-600'}`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -73,28 +74,27 @@ export default function TestimonialsSection() {
               </div>
 
               {/* Quote */}
-              <p className="text-gray-700 dark:text-[#E8E8E8] text-base leading-relaxed mb-6 italic">
+              <p className="text-gray-700 dark:text-white text-lg leading-relaxed mb-8 italic font-semibold">
                 "{t.quote}"
               </p>
 
               {/* Divider */}
-              <div className="border-t border-gray-200 dark:border-[#333333] mb-5" />
+              <div className="border-t-2 border-[#6D8196]/20 dark:border-[#6D8196]/40 mb-6" />
 
               {/* Author */}
               <div className="flex items-center gap-3">
                 <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0"
+                  className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0"
                   style={{ backgroundColor: '#6D8196' }}
                 >
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-[#E8E8E8] text-sm">{t.name}</p>
-                  <p className="text-xs text-gray-600 dark:text-[#999999]">
-                    {t.role} · {t.company} · {t.location}
-                  </p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{t.name}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">{t.role} · {t.company}</p>
                 </div>
               </div>
+
             </div>
           ))}
         </div>
