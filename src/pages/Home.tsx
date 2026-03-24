@@ -1,0 +1,618 @@
+/// <reference types="vite/client" />
+// COMPONENT: Public marketing homepage
+// FLOW: Static landing page — pricing CTA calls POST /api/create-checkout to start Stripe checkout
+// DISPLAYS: Hero, trade logos, features, pricing tiers (PPA/Pro/Enterprise), FAQ, footer
+// INTEGRATES: /api/create-checkout (Stripe) when user clicks a pricing plan button
+import { useState, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import logoImg from '../assets/logo-icon.png'
+
+const TRADES = [
+  { label: 'Roofing', icon: '🏠' },
+  { label: 'HVAC', icon: '❄️' },
+  { label: 'Plumbing', icon: '🔧' },
+  { label: 'Electrical', icon: '⚡' },
+  { label: 'Landscaping', icon: '🌿' },
+  { label: 'Remodeling', icon: '🔨' },
+]
+
+const FAQS = [
+  {
+    q: "Do I need a contract or long-term commitment?",
+    a: "Nope. Month-to-month, cancel anytime. We'd rather earn your business every month than lock you in.",
+  },
+  {
+    q: "My leads are really old. Will this still work?",
+    a: "Often yes. Even leads that went cold 6-12 months ago respond when you reach out at the right time with the right message. Most contractors are surprised how many come back.",
+  },
+  {
+    q: "Does it work for my trade?",
+    a: "If you quote jobs and follow up with leads, it works. Roofing, HVAC, plumbing, electrical, remodeling, landscaping — we've seen results across all of them.",
+  },
+  {
+    q: "What does the message actually say to my leads?",
+    a: "Something simple and personal, like 'Hey, this is Jake from Jake's Roofing. You reached out a while back about a roof inspection. Are you still looking?' You can customize the exact wording in your settings.",
+  },
+  {
+    q: "What if a lead replies and I'm not available?",
+    a: "BidBack keeps the conversation going until you're ready to step in. You'll get notified the moment someone responds, and you can take over the conversation from your dashboard.",
+  },
+  {
+    q: "How is this different from just sending a text myself?",
+    a: "It does it automatically for every lead, at the right time, with the right follow-up sequence. You'd have to remember to text 500 people, track who replied, and follow up again in 24 hours. BidBack does all of that without you touching it.",
+  },
+]
+
+const COMPARE_ROWS = [
+  { feature: 'Setup time',         leadly: '10 minutes',         ghl: '2-4 weeks',        hire: '2-4 weeks' },
+  { feature: 'Monthly cost',       leadly: 'From $150/mo',       ghl: '$297+ plus addons', hire: '$3,000-5,000/mo' },
+  { feature: 'Works without help', leadly: true,                  ghl: false,              hire: false },
+  { feature: 'Built for contractors', leadly: true,              ghl: false,              hire: null },
+  { feature: 'No annual contract', leadly: true,                  ghl: false,              hire: null },
+  { feature: 'CSV lead upload',    leadly: true,                  ghl: true,               hire: true },
+  { feature: 'Auto follow-up',     leadly: true,                  ghl: true,               hire: true },
+]
+
+const NAV_LINKS = ['How It Works', 'Pricing']
+
+const TESTIMONIALS = [
+  {
+    quote: "I uploaded 340 old leads on a Tuesday. By Thursday I had 6 callbacks and booked 2 jobs worth $14,000. I'd written those leads off months ago.",
+    name: 'D. Paulson',
+    title: 'Owner, Roofing Contractor',
+    location: 'Minneapolis, MN',
+  },
+  {
+    quote: "We were losing jobs because we couldn't follow up fast enough. Now every lead gets a text within seconds. Our close rate went up 30% in the first month.",
+    name: 'M. Gutierrez',
+    title: 'Office Manager, HVAC Company',
+    location: 'Dallas, TX',
+  },
+  {
+    quote: "GoHighLevel was way too complicated for us. This took 10 minutes to set up and started working immediately. Wish I'd found it sooner.",
+    name: 'T. Briggs',
+    title: 'Owner, Plumbing & Electric',
+    location: 'Columbus, OH',
+  },
+]
+
+const HOW_IT_WORKS = [
+  {
+    step: '01',
+    title: 'Upload your lead list',
+    desc: 'Got a CSV of old leads, past quotes, or contacts that went cold? Drop it in. Takes 30 seconds.',
+  },
+  {
+    step: '02',
+    title: 'We reach out for you',
+    desc: 'BidBack sends a personal text and email to every lead within seconds. Then follows up automatically until they respond.',
+  },
+  {
+    step: '03',
+    title: 'You close the job',
+    desc: 'When a lead responds and is ready to talk, you step in. We hand it off clean you just show up and close.',
+  },
+]
+
+const FEATURES = [
+  {
+    icon: '⚡',
+    title: 'First to reach them wins',
+    desc: 'The contractor who responds first gets the job 78% of the time. BidBack texts and emails your leads in seconds, not hours.',
+  },
+  {
+    icon: '💬',
+    title: 'Conversations that don\'t sound robotic',
+    desc: 'Our messages are written to sound like they came from you not a bot. Leads respond because they actually feel heard.',
+  },
+  {
+    icon: '📞',
+    title: 'Voicemails that get called back',
+    desc: 'Drop a personalized voicemail without the phone ever ringing. Leads listen when it\'s convenient and call you back ready to book.',
+  },
+  {
+    icon: '🔁',
+    title: 'Follows up so you don\'t have to',
+    desc: 'Most leads need 5+ touches before they respond. BidBack handles every follow-up automatically you\'ll never chase a lead again.',
+  },
+  {
+    icon: '📊',
+    title: 'Know exactly what\'s happening',
+    desc: 'One dashboard. Texts sent, emails opened, calls made, jobs booked. No spreadsheets, no guessing.',
+  },
+  {
+    icon: '🔗',
+    title: 'Plugs into what you already use',
+    desc: 'Works with your existing forms, CRM, or spreadsheets. No new systems to learn just connect and go.',
+  },
+]
+
+const PRICING = [
+  {
+    name: 'Starter',
+    price: '$150',
+    period: '/mo',
+    desc: 'Perfect for testing the waters with your first lead list.',
+    features: [
+      'Up to 300 leads per month',
+      'SMS outreach to every lead',
+      'AI sequences — smart timing + conditional logic',
+      'Leads saved and organized automatically',
+      'Email support',
+    ],
+    cta: 'Get Started',
+    highlight: false,
+    cartSlug: 'ppa',
+    roi: 'One job covers your first month.',
+  },
+  {
+    name: 'Pro',
+    price: '$400',
+    period: '/mo',
+    desc: 'For contractors doing real volume. This is where the ROI kicks in hard.',
+    features: [
+      'Up to 1,000 leads per month',
+      'SMS + Voicemail drops',
+      'AI sequences — smart timing + conditional logic',
+      'Handles conversations and books appointments for you',
+      'Priority support',
+    ],
+    cta: 'Get Started',
+    highlight: true,
+    cartSlug: 'pro',
+    roi: 'Most customers book 10-20 jobs in month one.',
+  },
+  {
+    name: 'Enterprise',
+    price: '$800',
+    period: '/mo',
+    desc: 'Running an agency or multiple locations? Built for you.',
+    features: [
+      'Up to 3,000 leads per month',
+      'SMS + Email + Voicemail',
+      'AI sequences — smart timing + conditional logic',
+      'Auto follow-up text at +2 days if no reply',
+      'Priority support',
+      'Custom integrations',
+    ],
+    cta: 'Get Started',
+    highlight: false,
+    cartSlug: 'ent',
+    roi: 'Scale across every location you run.',
+  },
+]
+
+const STAR_PARTICLES = [
+  { top: '8%',  left: '12%',  size: 'w-1 h-1',     opacity: 'opacity-40' },
+  { top: '15%', left: '80%',  size: 'w-1.5 h-1.5', opacity: 'opacity-30' },
+  { top: '25%', left: '5%',   size: 'w-1 h-1',     opacity: 'opacity-20' },
+  { top: '5%',  left: '60%',  size: 'w-1 h-1',     opacity: 'opacity-30' },
+  { top: '40%', left: '92%',  size: 'w-1 h-1',     opacity: 'opacity-20' },
+  { top: '55%', left: '3%',   size: 'w-1.5 h-1.5', opacity: 'opacity-20' },
+  { top: '18%', left: '45%',  size: 'w-0.5 h-0.5', opacity: 'opacity-40' },
+  { top: '30%', left: '70%',  size: 'w-1 h-1',     opacity: 'opacity-25' },
+]
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+      <button
+        className="w-full text-left px-6 py-4 flex items-center justify-between gap-4 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{q}</span>
+        <span className={`text-[#f97316] text-xl shrink-0 transition-transform ${open ? 'rotate-45' : ''}`}>+</span>
+      </button>
+      {open && (
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{a}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AdminModal({ onClose }: { onClose: () => void }) {
+  const [pw, setPw] = useState('')
+  const [err, setErr] = useState(false)
+  const navigate = useNavigate()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function submit() {
+    if (pw === 'leadly-admin-2026') {
+      localStorage.setItem('adminAuth', '1')
+      onClose()
+      navigate('/master/dashboard')
+    } else {
+      setErr(true)
+      setPw('')
+      setTimeout(() => inputRef.current?.focus(), 50)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Admin Access</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">Enter admin password to continue.</p>
+        <input
+          ref={inputRef}
+          autoFocus
+          type="password"
+          value={pw}
+          onChange={e => { setPw(e.target.value); setErr(false) }}
+          onKeyDown={e => e.key === 'Enter' && submit()}
+          placeholder="Password"
+          className={`w-full border rounded-lg px-4 py-2.5 text-sm mb-3 outline-none focus:ring-2 focus:ring-[#1e3a8a] dark:bg-gray-800 dark:text-white ${err ? 'border-red-400' : 'border-gray-300 dark:border-gray-700'}`}
+        />
+        {err && <p className="text-xs text-red-500 mb-3">Incorrect password.</p>}
+        <div className="flex gap-3">
+          <button onClick={submit} className="flex-1 bg-[#1e3a8a] text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-blue-900 transition-colors">
+            Sign In
+          </button>
+          <button onClick={onClose} className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Home() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+
+      {/* NAV */}
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+          <a href="/" className="flex items-center gap-2">
+            <img src={logoImg} alt="BidBack" className="h-9 w-auto" />
+            <span className="font-bold text-xl text-gray-900 dark:text-white">BidBack</span>
+          </a>
+          <nav className="hidden md:flex items-center gap-6">
+            {NAV_LINKS.map(l => (
+              <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316] transition-colors">
+                {l}
+              </a>
+            ))}
+          </nav>
+          <div className="hidden md:flex items-center gap-3">
+            <Link to="/signin" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316]">Sign In</Link>
+            <a href="#pricing" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
+              Get Started
+            </a>
+          </div>
+          <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+            <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
+            <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
+            <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300" />
+          </button>
+        </div>
+        {mobileOpen && (
+          <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 py-3 space-y-2">
+            {NAV_LINKS.map(l => (
+              <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="block py-2 text-sm text-gray-700 dark:text-gray-300" onClick={() => setMobileOpen(false)}>
+                {l}
+              </a>
+            ))}
+            <a href="#pricing" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2">
+              Get Started
+            </a>
+          </div>
+        )}
+      </header>
+
+      {/* HERO */}
+      <section className="relative bg-gradient-to-b from-[#f0f4ff] dark:from-gray-900 to-white dark:to-gray-950 py-24 px-4 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#1e3a8a] opacity-[0.06] dark:opacity-[0.15] rounded-full blur-3xl" />
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[200px] h-[200px] bg-[#f97316] opacity-[0.08] dark:opacity-[0.12] rounded-full blur-2xl" />
+          {STAR_PARTICLES.map((s, i) => (
+            <div key={i} className={`absolute ${s.size} ${s.opacity} bg-[#f97316] rounded-full`} style={{ top: s.top, left: s.left }} />
+          ))}
+        </div>
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-950/50 text-[#f97316] text-xs font-semibold px-3 py-1.5 rounded-full mb-8 border border-orange-200 dark:border-orange-800">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#f97316] animate-pulse" />
+            Built for contractors. Not agencies.
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+            You've got old leads<br />
+            <span className="text-[#2563eb] dark:text-[#f97316]">sitting there making nothing.</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-4">
+            Upload your list. BidBack texts, emails, and calls them for you within seconds. Most contractors recover 10–20 jobs from leads they'd already written off.
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mb-10">No setup call. No annual contract. Cancel anytime.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#pricing" className="bg-[#1e3a8a] text-white px-8 py-3.5 rounded-lg font-semibold text-base hover:bg-blue-900 transition-colors shadow-md">
+              Start Recovering Leads
+            </a>
+            <a href="#how-it-works" className="border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-8 py-3.5 rounded-lg font-semibold text-base hover:border-[#f97316] hover:text-[#f97316] transition-colors">
+              See How It Works
+            </a>
+          </div>
+        </div>
+
+        {/* STATS BAR */}
+        <div className="max-w-4xl mx-auto mt-16 relative z-10">
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg px-6 py-6">
+            {[
+              { val: '80%', label: 'of sales need 5+ follow-ups to close' },
+              { val: '44%', label: 'of contractors quit after just 1 attempt' },
+              { val: '78%', label: 'of jobs go to whoever responds first' },
+            ].map(s => (
+              <div key={s.label} className="text-center">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#f97316]">{s.val}</div>
+                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* TRADES BAR */}
+        <div className="max-w-3xl mx-auto mt-10 relative z-10 text-center">
+          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Used by contractors in</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {TRADES.map(t => (
+              <span key={t.label} className="inline-flex items-center gap-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 text-sm px-3 py-1.5 rounded-full">
+                {t.icon} {t.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how-it-works" className="py-20 px-4 bg-white dark:bg-gray-950">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ How It Works</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">Set up in 10 minutes. Results the same day.</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {HOW_IT_WORKS.map(h => (
+              <div key={h.step} className="relative">
+                <div className="text-5xl font-extrabold text-gray-100 dark:text-gray-800 mb-3 select-none">{h.step}</div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{h.title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{h.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Real Results</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">Contractors already winning back jobs</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={t.name} className={`bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col ${i === 1 ? 'p-8 md:-mt-4' : 'p-6'}`}>
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-4 h-4 text-[#f97316]" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1">"{t.quote}"</p>
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="font-semibold text-gray-900 dark:text-white text-sm">{t.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{t.title} · {t.location}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" className="py-20 px-4 bg-white dark:bg-gray-950">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-14">
+            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Features</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">Everything between "lead" and "booked job"</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-3 max-w-xl">Most contractors drop the ball between getting a lead and closing the job. BidBack handles every step in between.</p>
+          </div>
+          <div className="space-y-0 divide-y divide-gray-100 dark:divide-gray-800">
+            {FEATURES.map((f, i) => (
+              <div key={f.title} className={`flex items-start gap-6 py-8 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}>
+                <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/50 flex items-center justify-center text-2xl shrink-0">
+                  {f.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">{f.title}</h3>
+                  <p className="text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* COMPARISON TABLE */}
+      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Why BidBack</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">The honest comparison</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-3">There are other options. Here's how they stack up.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium w-1/3"></th>
+                  <th className="py-3 px-4 text-center">
+                    <span className="inline-flex items-center gap-1 bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-xs font-bold">✦ BidBack</span>
+                  </th>
+                  <th className="py-3 px-4 text-center text-gray-500 dark:text-gray-400 font-medium text-xs">GoHighLevel</th>
+                  <th className="py-3 px-4 text-center text-gray-500 dark:text-gray-400 font-medium text-xs">Hiring Someone</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {COMPARE_ROWS.map(row => (
+                  <tr key={row.feature} className="bg-white dark:bg-gray-800/50">
+                    <td className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{row.feature}</td>
+                    <td className="py-3 px-4 text-center">
+                      {row.leadly === true ? <span className="text-green-500 font-bold text-base">✓</span>
+                        : row.leadly === false ? <span className="text-red-400">✗</span>
+                        : row.leadly === null ? <span className="text-gray-300 dark:text-gray-700 text-xs">—</span>
+                        : <span className="text-[#1e3a8a] dark:text-blue-400 font-semibold text-xs">{row.leadly}</span>}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      {row.ghl === true ? <span className="text-green-500">✓</span>
+                        : row.ghl === false ? <span className="text-red-400">✗</span>
+                        : row.ghl === null ? <span className="text-gray-300 dark:text-gray-700 text-xs">—</span>
+                        : <span className="text-gray-500 dark:text-gray-400 text-xs">{row.ghl}</span>}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      {row.hire === true ? <span className="text-green-500">✓</span>
+                        : row.hire === false ? <span className="text-red-400">✗</span>
+                        : row.hire === null ? <span className="text-gray-300 dark:text-gray-700 text-xs">—</span>
+                        : <span className="text-gray-500 dark:text-gray-400 text-xs">{row.hire}</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ Pricing</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">One job pays for months of BidBack</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-3">No setup fees. No long-term contracts. Cancel anytime though most people don't.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {PRICING.map(p => (
+              <div key={p.name} className={`bg-white dark:bg-gray-800 rounded-2xl border p-8 flex flex-col relative ${p.highlight ? 'border-[#1e3a8a] dark:border-[#f97316] shadow-xl' : 'border-gray-200 dark:border-gray-700 shadow-sm'}`}>
+                {p.highlight && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#f97316] text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                    Most Popular
+                  </span>
+                )}
+                <div className="mb-6">
+                  <div className="font-bold text-gray-900 dark:text-white text-lg">{p.name}</div>
+                  <div className="mt-2 flex items-end gap-1">
+                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white">{p.price}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm mb-1">{p.period}</span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{p.desc}</p>
+                  <p className="text-xs font-semibold text-[#f97316] mt-2">💰 {p.roi}</p>
+                </div>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {p.features.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <svg className="w-4 h-4 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to={`/cart?plan=${p.cartSlug}`}
+                  className={`w-full text-center py-3 rounded-lg font-semibold text-sm transition-colors block ${
+                    p.highlight
+                      ? 'bg-[#1e3a8a] text-white hover:bg-blue-900'
+                      : 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[#f97316] hover:text-[#f97316]'
+                  }`}
+                >
+                  {p.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-6">30-day money-back guarantee. If you don't recover at least one lead, we'll refund you no questions asked.</p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 px-4 bg-white dark:bg-gray-950">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ FAQ</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">Questions we get a lot</h2>
+          </div>
+          <div className="space-y-4">
+            {FAQS.map((faq, i) => (
+              <FaqItem key={i} q={faq.q} a={faq.a} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+
+      {/* CTA */}
+      <section className="py-24 px-4 bg-[#1e3a8a] dark:bg-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#f97316] opacity-[0.06] rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-2xl mx-auto text-center relative z-10">
+          <img src={logoImg} alt="" className="h-12 w-auto mx-auto mb-6 opacity-80" />
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">There are jobs sitting in your old lead list right now.</h2>
+          <p className="text-blue-200 dark:text-gray-400 mb-2">The contractor who follows up wins. BidBack makes sure that contractor is you.</p>
+          <p className="text-blue-300 dark:text-gray-500 text-sm mb-8">Join 500+ contractors already winning back business on autopilot.</p>
+          <a href="#pricing" className="inline-block bg-[#f97316] text-white px-10 py-4 rounded-lg font-bold text-base hover:bg-orange-600 transition-colors shadow-lg">
+            Start Recovering Leads Today
+          </a>
+          <p className="text-blue-300 dark:text-gray-500 text-xs mt-4">30-day money-back guarantee · No setup fees · Cancel anytime</p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-gray-900 dark:bg-black text-gray-400 py-12 px-4">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-2 mb-3">
+              <img src={logoImg} alt="BidBack" className="h-7 w-auto" />
+              <span className="font-bold text-white text-lg">BidBack</span>
+            </div>
+            <p className="text-sm leading-relaxed">Automated lead follow-up built for contractors who are tired of chasing.</p>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold text-sm mb-3">Product</h4>
+            <ul className="space-y-2">
+              <li><a href="#how-it-works" className="text-sm hover:text-white transition-colors">How It Works</a></li>
+              <li><a href="#features" className="text-sm hover:text-white transition-colors">Features</a></li>
+              <li><a href="#pricing" className="text-sm hover:text-white transition-colors">Pricing</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold text-sm mb-3">Legal</h4>
+            <ul className="space-y-2">
+              <li><Link to="/privacy" className="text-sm hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-sm hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link to="/cookies" className="text-sm hover:text-white transition-colors">Cookie Policy</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
+          <span>© {new Date().getFullYear()} BidBack. All rights reserved.</span>
+          <span>Built for contractors who close.</span>
+          <button onClick={() => setShowAdmin(true)} className="text-gray-700 hover:text-gray-500 transition-colors text-xs opacity-30 hover:opacity-60">
+            Admin
+          </button>
+        </div>
+      </footer>
+
+      {showAdmin && <AdminModal onClose={() => setShowAdmin(false)} />}
+    </div>
+  )
+}
