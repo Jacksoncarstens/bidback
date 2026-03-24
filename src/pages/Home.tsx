@@ -6,10 +6,9 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import logoImg from '../assets/logo-icon.png'
-import HeroSection from '../components/HeroSection'
+import { CinematicHero } from '../components/ui/bidback-cinematic-hero'
 import TestimonialsSection from '../components/TestimonialsSection'
 import PricingSection from '../components/PricingSection'
-import ThemeToggle from '../components/ThemeToggle'
 
 const FAQS = [
   {
@@ -190,14 +189,12 @@ export default function Home() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-2">
-            <ThemeToggle />
             <Link to="/signin" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316]">Sign In</Link>
-            <a href="#pricing" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
+            <a href="#how-it-works" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
               Get Started
             </a>
           </div>
           <div className="md:hidden flex items-center gap-1">
-            <ThemeToggle />
             <button className="p-2" onClick={() => setMobileOpen(!mobileOpen)}>
               <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
               <div className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 mb-1" />
@@ -212,14 +209,14 @@ export default function Home() {
                 {l}
               </a>
             ))}
-            <a href="#pricing" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2">
+            <a href="#how-it-works" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2">
               Get Started
             </a>
           </div>
         )}
       </header>
 
-      <HeroSection />
+      <CinematicHero />
 
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="py-20 px-4 bg-white dark:bg-gray-950">

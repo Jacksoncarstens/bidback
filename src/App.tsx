@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { ThemeProvider } from './lib/theme'
 import Home from './pages/Home'
 import SignIn from './pages/SignIn'
 import Cart from './pages/Cart'
@@ -26,7 +25,6 @@ import MasterSettings from './pages/master/MasterSettings'
 
 export default function App() {
   return (
-    <ThemeProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -60,6 +58,5 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
-    </ThemeProvider>
   )
 }

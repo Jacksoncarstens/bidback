@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, Link, Navigate } from 'react-router-dom'
 import logoImg from '../assets/logo-icon.png'
-import ThemeToggle from '../components/ThemeToggle'
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'leadly-admin-2026'
 
@@ -136,7 +135,6 @@ export default function AdminLayout() {
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               Live
             </span>
-            <ThemeToggle />
             <Link to="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">← Back to site</Link>
           </div>
         </header>
