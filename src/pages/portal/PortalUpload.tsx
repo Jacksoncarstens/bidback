@@ -42,6 +42,7 @@ export default function PortalUpload() {
   const [error, setError]           = useState<string | null>(null)
   const [uploads, setUploads]       = useState<Upload[]>(getSavedUploads)
   const [successCount, setSuccessCount] = useState<number | null>(null)
+  const [consentChecked, setConsentChecked] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const info   = getPortalInfo()
@@ -102,6 +103,7 @@ export default function PortalUpload() {
     if (file) processFile(file)
   }
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!consentChecked) return
     const file = e.target.files?.[0]
     if (file) processFile(file)
     if (inputRef.current) inputRef.current.value = ''
@@ -162,9 +164,9 @@ export default function PortalUpload() {
         onDragOver={e => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        onClick={() => !uploading && inputRef.current?.click()}
+        onClick={() => !uploading && consentChecked && inputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
-          uploading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+          uploading || !consentChecked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
         } ${dragging
           ? 'border-[#1e3a8a] bg-blue-50 dark:bg-blue-900/10'
           : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-[#1e3a8a] hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -218,6 +220,18 @@ export default function PortalUpload() {
           <p className="text-xs text-gray-400 mt-2">Processing leads and scheduling follow-ups...</p>
         </div>
       )}
+
+      <label className="flex items-start gap-3 cursor-pointer p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#1e3a8a] hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors">
+        <input
+          type="checkbox"
+          checked={consentChecked}
+          onChange={e => setConsentChecked(e.target.checked)}
+          className="mt-0.5 w-4 h-4 rounded border-gray-300 accent-[#1e3a8a] shrink-0"
+        />
+        <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="font-semibold">Required:</span> I confirm that I have obtained explicit written or verbal consent from all leads to receive SMS, email, and voicemail messages.
+        </span>
+      </label>
 
       <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl p-5">
         <h3 className="font-semibold text-amber-800 dark:text-amber-300 text-sm mb-2">CSV Format</h3>

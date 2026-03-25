@@ -22,6 +22,7 @@ import MasterCustomers from './pages/master/MasterCustomers'
 import MasterLeads from './pages/master/MasterLeads'
 import MasterReplies from './pages/master/MasterReplies'
 import MasterSettings from './pages/master/MasterSettings'
+import PublicLeadOptIn from './pages/PublicLeadOptIn'
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
+        <Route path="/lead-opt-in" element={<PublicLeadOptIn />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
