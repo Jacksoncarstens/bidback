@@ -67,6 +67,16 @@ const HOW_IT_WORKS = [
   },
 ]
 
+const EXAMPLE_LEADS = [
+  { name: 'John Smith',    company: 'Smith Plumbing',     status: 'Replied',       message: 'Yes, interested!',          date: 'Mar 28' },
+  { name: 'Sarah Jones',   company: 'Jones Electric',     status: 'Pending',       message: 'SMS sent',                  date: 'Mar 27' },
+  { name: 'Mike Brown',    company: 'Brown HVAC',         status: 'Not Interested',message: 'Not looking right now',     date: 'Mar 26' },
+  { name: 'Lisa Garcia',   company: 'Garcia Roofing',     status: 'Replied',       message: 'Send me a quote',           date: 'Mar 26' },
+  { name: 'David Kim',     company: 'Kim Construction',   status: 'Pending',       message: 'Email sent',                date: 'Mar 25' },
+  { name: 'Tony Rivera',   company: 'Rivera Landscaping', status: 'Replied',       message: 'When can you come out?',    date: 'Mar 24' },
+  { name: 'Amy Chen',      company: 'Chen Remodeling',    status: 'Not Interested',message: 'Already hired someone',     date: 'Mar 23' },
+]
+
 const FEATURES = [
   {
     icon: '⚡',
@@ -236,6 +246,101 @@ export default function Home() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{h.desc}</p>
               </div>
             ))}
+          </div>
+
+          {/* DASHBOARD PREVIEW */}
+          <div className="mt-20">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Here's What You'll See</h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">Every lead automatically tracked in one dashboard</p>
+            </div>
+            <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl">
+              {/* Browser chrome */}
+              <div className="bg-gray-200 dark:bg-gray-800 px-4 py-2.5 flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                  <div className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
+                <div className="flex-1 bg-white dark:bg-gray-700 rounded px-3 py-1 text-xs text-gray-500 dark:text-gray-400 max-w-sm">
+                  app.bidback.io/dashboard
+                </div>
+              </div>
+              {/* Portal */}
+              <div className="bg-white dark:bg-[#1A1A1A]">
+                {/* Portal header */}
+                <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-wrap gap-3">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base">My Leads</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 hidden sm:flex">
+                      <span>🔍</span> Search leads…
+                    </div>
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-default">
+                      Filter ▾
+                    </div>
+                  </div>
+                </div>
+                {/* Stats bar */}
+                <div className="grid grid-cols-4 divide-x divide-gray-100 dark:divide-gray-800 border-b border-gray-100 dark:border-gray-800">
+                  {[
+                    { label: 'Total',        value: '446', color: 'text-gray-900 dark:text-white' },
+                    { label: 'Replied',      value: '128', color: 'text-green-600 dark:text-green-400' },
+                    { label: 'Not Interested', value: '87', color: 'text-red-500 dark:text-red-400' },
+                    { label: 'Pending',      value: '231', color: 'text-blue-600 dark:text-blue-400' },
+                  ].map(s => (
+                    <div key={s.label} className="px-2 sm:px-4 py-3 text-center">
+                      <div className={`text-lg sm:text-xl font-bold ${s.color}`}>{s.value}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 leading-tight">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Name</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide hidden sm:table-cell">Company</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide hidden md:table-cell">Last Message</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide hidden sm:table-cell">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                      {EXAMPLE_LEADS.map((lead, i) => (
+                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white text-sm">{lead.name}</td>
+                          <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm hidden sm:table-cell">{lead.company}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              lead.status === 'Replied'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : lead.status === 'Pending'
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            }`}>{lead.status}</span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm hidden md:table-cell">{lead.message}</td>
+                          <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs hidden sm:table-cell">{lead.date}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Pagination */}
+                <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">1–7 of 446 leads</span>
+                  <div className="flex gap-1">
+                    <button className="px-3 py-1 text-xs border border-gray-200 dark:border-gray-700 rounded text-gray-400 dark:text-gray-500">← Prev</button>
+                    <button className="px-3 py-1 text-xs bg-[#1e3a8a] text-white rounded">1</button>
+                    <button className="px-3 py-1 text-xs border border-gray-200 dark:border-gray-700 rounded text-gray-500 dark:text-gray-400">Next →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+              SMS replies, email opens, voicemail drops — all in one place
+            </p>
           </div>
         </div>
       </section>
