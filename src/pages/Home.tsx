@@ -9,7 +9,6 @@ import logoImg from '../assets/logo-icon.png'
 import { CinematicHero } from '../components/ui/bidback-cinematic-hero'
 import TestimonialsSection from '../components/TestimonialsSection'
 import PricingSection from '../components/PricingSection'
-import WaitlistSignup from '../components/WaitlistSignup'
 import TrustBadges from '../components/TrustBadges'
 
 const FAQS = [
@@ -210,8 +209,7 @@ export default function Home() {
           </nav>
           <div className="hidden md:flex items-center gap-2">
             <Link to="/signin" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316]">Sign In</Link>
-            <a href="#waitlist" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316] hover:underline">Waitlist</a>
-            <a href="#waitlist" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
+            <a href="#how-it-works" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
               Get Started
             </a>
           </div>
@@ -233,10 +231,7 @@ export default function Home() {
             <Link to="/signin" className="block py-2 text-sm text-gray-700 dark:text-gray-300" onClick={() => setMobileOpen(false)}>
               Sign In
             </Link>
-            <a href="#waitlist" className="block py-2 text-sm text-gray-700 dark:text-gray-300" onClick={() => setMobileOpen(false)}>
-              Waitlist
-            </a>
-            <a href="#waitlist" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2" onClick={() => setMobileOpen(false)}>
+            <a href="#how-it-works" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2" onClick={() => setMobileOpen(false)}>
               Get Started
             </a>
           </div>
@@ -244,8 +239,6 @@ export default function Home() {
       </header>
 
       <CinematicHero />
-
-      <WaitlistSignup />
 
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="py-20 px-4 bg-white dark:bg-gray-950">
@@ -490,7 +483,6 @@ export default function Home() {
               <li><a href="#features" className="text-sm hover:text-white transition-colors">Features</a></li>
               <li><a href="#pricing" className="text-sm hover:text-white transition-colors">Pricing</a></li>
               <li><a href="#faq" className="text-sm hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="#waitlist" className="text-sm hover:text-white transition-colors">Join Waitlist</a></li>
             </ul>
           </div>
           <div>

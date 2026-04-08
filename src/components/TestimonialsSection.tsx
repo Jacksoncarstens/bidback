@@ -112,14 +112,14 @@ export default function TestimonialsSection() {
         <div className="text-center mt-14">
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Ready to start winning back leads?</p>
           <a
-            href="#waitlist"
+            href="#pricing"
             className="inline-block bg-[#1e3a8a] text-white px-8 py-3 rounded-lg font-semibold text-sm hover:bg-blue-900 transition-colors"
           >
-            Join the Waitlist
+            See Pricing
           </a>
         </div>
 
-      </div>
+</div>
     </section>
   )
 }
