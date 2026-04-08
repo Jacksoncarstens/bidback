@@ -9,31 +9,41 @@ import logoImg from '../assets/logo-icon.png'
 import { CinematicHero } from '../components/ui/bidback-cinematic-hero'
 import TestimonialsSection from '../components/TestimonialsSection'
 import PricingSection from '../components/PricingSection'
+import WaitlistSignup from '../components/WaitlistSignup'
+import TrustBadges from '../components/TrustBadges'
 
 const FAQS = [
   {
-    q: "Do I need a contract or long-term commitment?",
-    a: "Nope. Month-to-month, cancel anytime. We'd rather earn your business every month than lock you in.",
+    q: "How long does setup take?",
+    a: "Setup is quick. Once Twilio approves your account (1–2 weeks), you can upload your first CSV and start within hours. No coding required.",
   },
   {
-    q: "My leads are really old. Will this still work?",
-    a: "Often yes. Even leads that went cold 6-12 months ago respond when you reach out at the right time with the right message. Most contractors are surprised how many come back.",
+    q: "What happens if a lead replies STOP?",
+    a: "STOP replies are automatically respected. We remove them from all future campaigns and you're notified. Full TCPA compliance.",
   },
   {
-    q: "Does it work for my trade?",
-    a: "If you quote jobs and follow up with leads, it works. Roofing, HVAC, plumbing, electrical, remodeling, landscaping — we've seen results across all of them.",
+    q: "Is BidBack TCPA compliant?",
+    a: "Yes. We require leads to opt-in via our consent form before any messages are sent. All compliance documentation is provided for your records.",
   },
   {
-    q: "What does the message actually say to my leads?",
-    a: "Something simple and personal, like 'Hey, this is Jake from Jake's Roofing. You reached out a while back about a roof inspection. Are you still looking?' You can customize the exact wording in your settings.",
+    q: "How much does it cost?",
+    a: "Pricing is per-lead. We'll send SMS and voicemail messages to revive your leads. Exact pricing available after sign-up.",
   },
   {
-    q: "What if a lead replies and I'm not available?",
-    a: "BidBack keeps the conversation going until you're ready to step in. You'll get notified the moment someone responds, and you can take over the conversation from your dashboard.",
+    q: "Can I customize the messages?",
+    a: "Yes. You can customize the message templates for SMS, voicemail, and email to match your brand voice.",
   },
   {
-    q: "How is this different from just sending a text myself?",
-    a: "It does it automatically for every lead, at the right time, with the right follow-up sequence. You'd have to remember to text 500 people, track who replied, and follow up again in 24 hours. BidBack does all of that without you touching it.",
+    q: "What if a lead opts out?",
+    a: "All opt-out requests are honored immediately. We manage the compliance side so you don't have to worry.",
+  },
+  {
+    q: "Do I need my own Twilio account?",
+    a: "No. We manage Twilio for you. You just upload leads and track replies.",
+  },
+  {
+    q: "Can I track replies and metrics?",
+    a: "Absolutely. Your portal shows every lead's status: replied, interested, not interested, pending. Full analytics dashboard.",
   },
 ]
 
@@ -47,7 +57,7 @@ const COMPARE_ROWS = [
   { feature: 'Auto follow-up',     leadly: true,                  ghl: true,               hire: true },
 ]
 
-const NAV_LINKS = ['How It Works', 'Pricing']
+const NAV_LINKS = ['How It Works', 'Pricing', 'FAQ']
 
 const HOW_IT_WORKS = [
   {
@@ -200,7 +210,8 @@ export default function Home() {
           </nav>
           <div className="hidden md:flex items-center gap-2">
             <Link to="/signin" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316]">Sign In</Link>
-            <a href="#how-it-works" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
+            <a href="#waitlist" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2563eb] dark:hover:text-[#f97316] hover:underline">Waitlist</a>
+            <a href="#waitlist" className="bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">
               Get Started
             </a>
           </div>
@@ -222,7 +233,10 @@ export default function Home() {
             <Link to="/signin" className="block py-2 text-sm text-gray-700 dark:text-gray-300" onClick={() => setMobileOpen(false)}>
               Sign In
             </Link>
-            <a href="#how-it-works" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2">
+            <a href="#waitlist" className="block py-2 text-sm text-gray-700 dark:text-gray-300" onClick={() => setMobileOpen(false)}>
+              Waitlist
+            </a>
+            <a href="#waitlist" className="block w-full bg-[#1e3a8a] text-white text-sm px-4 py-2 rounded-lg text-center mt-2" onClick={() => setMobileOpen(false)}>
               Get Started
             </a>
           </div>
@@ -230,6 +244,8 @@ export default function Home() {
       </header>
 
       <CinematicHero />
+
+      <WaitlistSignup />
 
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="py-20 px-4 bg-white dark:bg-gray-950">
@@ -424,7 +440,7 @@ export default function Home() {
       <PricingSection />
 
       {/* FAQ */}
-      <section className="py-20 px-4 bg-white dark:bg-gray-950">
+      <section id="faq" className="py-20 px-4 bg-white dark:bg-gray-950">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-xs font-semibold text-[#f97316] uppercase tracking-widest">✦ FAQ</span>
@@ -473,6 +489,8 @@ export default function Home() {
               <li><a href="#how-it-works" className="text-sm hover:text-white transition-colors">How It Works</a></li>
               <li><a href="#features" className="text-sm hover:text-white transition-colors">Features</a></li>
               <li><a href="#pricing" className="text-sm hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="#faq" className="text-sm hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="#waitlist" className="text-sm hover:text-white transition-colors">Join Waitlist</a></li>
             </ul>
           </div>
           <div>
@@ -484,7 +502,8 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
+        <TrustBadges />
+        <div className="max-w-6xl mx-auto pt-2 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
           <span>© {new Date().getFullYear()} BidBack. All rights reserved.</span>
           <span>Built for contractors who close.</span>
           <button onClick={() => setShowAdmin(true)} className="text-gray-700 hover:text-gray-500 transition-colors text-xs opacity-30 hover:opacity-60">

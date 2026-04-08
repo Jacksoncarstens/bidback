@@ -2,6 +2,7 @@
 const TESTIMONIALS = [
   {
     quote: "I uploaded 340 old leads on a Tuesday. By Thursday I had 6 callbacks and booked 2 jobs worth $14,000. I'd written those leads off months ago.",
+    metric: { icon: '💰', text: '$14K revenue in 48 hours' },
     name: 'D. Paulson',
     role: 'Owner',
     company: 'Roofing Contractor',
@@ -11,6 +12,7 @@ const TESTIMONIALS = [
   },
   {
     quote: "We were losing jobs because we couldn't follow up fast enough. Now every lead gets a text within seconds. Our close rate went up 30% in the first month.",
+    metric: { icon: '📈', text: '30% higher close rate' },
     name: 'M. Gutierrez',
     role: 'Office Manager',
     company: 'HVAC Company',
@@ -20,6 +22,7 @@ const TESTIMONIALS = [
   },
   {
     quote: "GoHighLevel was way too complicated for us. This took 10 minutes to set up and started working immediately. Wish I'd found it sooner.",
+    metric: { icon: '⏱️', text: '10-minute setup, same-day results' },
     name: 'T. Briggs',
     role: 'Owner',
     company: 'Plumbing & Electric',
@@ -31,7 +34,7 @@ const TESTIMONIALS = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-12 lg:py-24 bg-gray-50 dark:bg-[#030712]">
+    <section className="py-12 lg:py-24 bg-gray-50 dark:bg-[#030712]" id="testimonials">
       <div className="max-w-6xl mx-auto px-4">
 
         <div className="text-center mb-14">
@@ -74,9 +77,15 @@ export default function TestimonialsSection() {
               </div>
 
               {/* Quote */}
-              <p className="text-gray-700 dark:text-white text-lg leading-relaxed mb-8 italic font-semibold">
+              <p className="text-gray-700 dark:text-white text-lg leading-relaxed mb-4 italic font-semibold">
                 "{t.quote}"
               </p>
+
+              {/* Metric */}
+              <div className="inline-flex items-center gap-2 bg-[#6D8196]/10 dark:bg-[#6D8196]/20 text-[#6D8196] dark:text-[#a8bfcf] rounded-full px-4 py-1.5 mb-6">
+                <span className="text-base">{t.metric.icon}</span>
+                <span className="text-sm font-semibold">{t.metric.text}</span>
+              </div>
 
               {/* Divider */}
               <div className="border-t-2 border-[#6D8196]/20 dark:border-[#6D8196]/40 mb-6" />
@@ -97,6 +106,17 @@ export default function TestimonialsSection() {
 
             </div>
           ))}
+        </div>
+
+        {/* Secondary CTA */}
+        <div className="text-center mt-14">
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Ready to start winning back leads?</p>
+          <a
+            href="#waitlist"
+            className="inline-block bg-[#1e3a8a] text-white px-8 py-3 rounded-lg font-semibold text-sm hover:bg-blue-900 transition-colors"
+          >
+            Join the Waitlist
+          </a>
         </div>
 
       </div>
